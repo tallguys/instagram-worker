@@ -9,6 +9,8 @@ import (
 	"instagram-worker/internal/pkg/httpclient"
 	"net/http"
 	"net/url"
+
+	logger "github.com/sirupsen/logrus"
 )
 
 var cfg = config.Load()
@@ -108,6 +110,7 @@ func fetchShortCodes(pageInfo *accountBusiness.PageInfo, account accountPersist.
 			if !ok {
 				scrolled = false
 				res = append(res, shortcode)
+				logger.Info(fmt.Sprintf("find shortcode %s", shortcode))
 			}
 		}
 
@@ -143,6 +146,7 @@ func fetchShortCodes(pageInfo *accountBusiness.PageInfo, account accountPersist.
 			if !ok {
 				scrolled = false
 				res = append(res, shortcode)
+				logger.Info(fmt.Sprintf("find shortcode %s", shortcode))
 			}
 		}
 
@@ -154,8 +158,6 @@ func fetchShortCodes(pageInfo *accountBusiness.PageInfo, account accountPersist.
 		if err != nil {
 			return err
 		}
-
-		fmt.Printf("fetched %d shortcodes\n", len(res))
 	}
 
 	err := accountPersist.UpdateAccount(account.ID, "", res)

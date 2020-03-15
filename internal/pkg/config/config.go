@@ -39,7 +39,7 @@ type TomlCfg struct {
 	HTML     html     `toml:"html"`
 	POSTGRES postgres `toml:"postgres"`
 	Download download `toml:"download"`
-	Worker   worker   `toml:"concurrency"`
+	Worker   worker   `toml:"worker"`
 }
 
 var once sync.Once

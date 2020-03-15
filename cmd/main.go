@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"instagram-worker/internal/app/service/crawler"
+
+	logger "github.com/sirupsen/logrus"
 )
 
 func main() {
 	err := crawler.Crawl("nba")
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 	}
-	fmt.Println("finsih")
+	logger.Info("finish")
 }

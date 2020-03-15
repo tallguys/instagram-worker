@@ -5,6 +5,8 @@ import (
 	postBusiness "instagram-worker/internal/app/model/business/post"
 	postPersist "instagram-worker/internal/app/model/persistence/post"
 	"instagram-worker/internal/pkg/httpclient"
+
+	logger "github.com/sirupsen/logrus"
 )
 
 const IMAGE_TYPE = "image"
@@ -17,7 +19,7 @@ func process(username string, shortcode string, accountID int) error {
 	}
 
 	if len(_posts) > 0 {
-		fmt.Printf("%s had processed before, skip.\n", shortcode)
+		logger.Info(fmt.Sprintf("%s had processed before, skip.", shortcode))
 		return nil
 	}
 
