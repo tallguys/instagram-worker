@@ -29,12 +29,17 @@ type postgres struct {
 	DB   string `toml:"db"`
 }
 
+type worker struct {
+	Concurrency int `toml:"concurrency"`
+}
+
 // TomlCfg the toml configuration file
 type TomlCfg struct {
 	HTTP     http     `toml:"http"`
 	HTML     html     `toml:"html"`
 	POSTGRES postgres `toml:"postgres"`
 	Download download `toml:"download"`
+	Worker   worker   `toml:"concurrency"`
 }
 
 var once sync.Once

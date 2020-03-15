@@ -36,14 +36,39 @@ func Crawl(username string) error {
 
 	shortcodes := account.Shortcodes
 
+	maxConncurrency := cfg.Worker.Concurrency
+
+	jobs := make(chan string, maxConncurrency)
+	results := make(chan struct{}, len(shortcodes))
+
+	for w := 1; w <= maxConncurrency; w++ {
+		go worker(username, account.ID, jobs, results)
+	}
+
 	for _, shortcode := range shortcodes {
-		err := process(username, shortcode, account.ID)
+		jobs <- shortcode
+	}
+
+	close(jobs)
+
+	for range shortcodes {
+		<-results
+	}
+
+	fmt.Println("finish")
+
+	return nil
+}
+
+func worker(username string, accountID int, jobs <-chan string, results chan<- struct{}) {
+	for shortcode := range jobs {
+		err := process(username, shortcode, accountID)
 		if err != nil {
 			fmt.Printf("process %s unsuccessfully. Error: %v\n", shortcode, err)
 		} else {
 			fmt.Printf("process %s successfully\n", shortcode)
 		}
-	}
 
-	return nil
+		results <- struct{}{}
+	}
 }
