@@ -5,7 +5,7 @@ Download images and videos from an instagram account.
 
 ## Start
 ```
-$ go run cmd/main.go
+$ go run cmd/main.go [username]
 ```
 
 ## Dependency
