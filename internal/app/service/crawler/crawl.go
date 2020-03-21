@@ -12,7 +12,20 @@ import (
 func Crawl(username string) error {
 	account, err := accountPersist.FindAccountByUsername(username)
 	if err != nil {
-		return err
+		switch err.(type) {
+		case *accountPersist.AccountNotFoundError:
+			err = accountPersist.InsertAccount(username)
+			if err != nil {
+				return err
+			}
+			account, err = accountPersist.FindAccountByUsername(username)
+			if err != nil {
+				return err
+			}
+			break
+		default:
+			return err
+		}
 	}
 
 	pageInfo, err := accountBusiness.Request(username)

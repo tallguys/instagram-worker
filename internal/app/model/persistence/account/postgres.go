@@ -17,6 +17,12 @@ type Account struct {
 	UpdatedAt    time.Time `db:"updated_at"`
 }
 
+type AccountNotFoundError struct{}
+
+func (e *AccountNotFoundError) Error() string {
+	return "Account not found"
+}
+
 func FindAccountByUsername(username string) (*Account, error) {
 	db := pg.DB()
 	rows, err := db.Query("SELECT * FROM account WHERE username = $1", username)
@@ -34,7 +40,7 @@ func FindAccountByUsername(username string) (*Account, error) {
 		return &account, nil
 	}
 
-	return nil, errors.New("User not found")
+	return nil, &AccountNotFoundError{}
 }
 
 func UpdateAccount(ID int, latestCursor string, shortcodes []string) error {
@@ -50,7 +56,26 @@ func UpdateAccount(ID int, latestCursor string, shortcodes []string) error {
 	}
 
 	if affected <= 0 {
-		return errors.New("update user failed")
+		return errors.New("Update account unsuccessfully")
+	}
+
+	return nil
+}
+
+func InsertAccount(username string) error {
+	db := pg.DB()
+	res, err := db.Exec("INSERT INTO account(username, latest_cursor, shortcodes) values ($1, '', array[]::varchar[])", username)
+	if err != nil {
+		return err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected <= 0 {
+		return errors.New("Insert account unsuccessfully")
 	}
 
 	return nil

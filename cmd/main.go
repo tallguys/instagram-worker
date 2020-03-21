@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	logger.SetLevel(logger.DebugLevel)
+
 	if len(os.Args) < 2 {
 		logger.Error("Please input the username")
 		return

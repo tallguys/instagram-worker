@@ -30,7 +30,12 @@ func process(username string, shortcode string, accountID int) error {
 
 	postPage := pageInfo.SharedData.EntryData.PostPage[0]
 
-	content := postPage.Graphql.ShortcodeMedia.EdgeMediaToCaption.Edges[0].Node.Text
+	var content string
+	if len(postPage.Graphql.ShortcodeMedia.EdgeMediaToCaption.Edges) > 0 {
+		content = postPage.Graphql.ShortcodeMedia.EdgeMediaToCaption.Edges[0].Node.Text
+	} else {
+		content = ""
+	}
 	takenAt := postPage.Graphql.ShortcodeMedia.TakenAtTimestamp
 	likeCount := postPage.Graphql.ShortcodeMedia.EdgeMediaPreviewLike.Count
 	typename := postPage.Graphql.ShortcodeMedia.Typename
