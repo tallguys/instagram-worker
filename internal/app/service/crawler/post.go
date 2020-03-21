@@ -5,12 +5,41 @@ import (
 	postBusiness "instagram-worker/internal/app/model/business/post"
 	postPersist "instagram-worker/internal/app/model/persistence/post"
 	"instagram-worker/internal/pkg/httpclient"
+	"net/url"
+	"strings"
 
 	logger "github.com/sirupsen/logrus"
 )
 
 const IMAGE_TYPE = "image"
 const VIDEO_TYPE = "video"
+
+func buildFilepath(downloadURL *url.URL, username string, shortcode string, likeCount int) string {
+	urlPath := downloadURL.Path
+	segments := strings.Split(urlPath, "/")
+
+	filename := segments[len(segments)-1]
+
+	filepath := fmt.Sprintf("%s/%s/%d_%s_%s", cfg.Download.Folder, username, likeCount, shortcode, filename)
+
+	return filepath
+}
+
+func download(rawurl string, username string, shortcode string, likeCount int) (string, error) {
+	downloadURL, err := url.Parse(rawurl)
+	if err != nil {
+		return "", err
+	}
+
+	filepath := buildFilepath(downloadURL, username, shortcode, likeCount)
+
+	err = httpclient.Download(downloadURL, filepath)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath, nil
+}
 
 func process(username string, shortcode string, accountID int) error {
 	_posts, err := postPersist.FindPostsByShortcode(accountID, shortcode)
@@ -41,7 +70,6 @@ func process(username string, shortcode string, accountID int) error {
 	typename := postPage.Graphql.ShortcodeMedia.Typename
 
 	posts := []*postPersist.Post{}
-	dir := fmt.Sprintf("%s/%s/%s", cfg.Download.Folder, username, shortcode)
 
 	switch typename {
 	case "GraphSidecar":
@@ -56,7 +84,7 @@ func process(username string, shortcode string, accountID int) error {
 				mediaType = IMAGE_TYPE
 			}
 
-			downloadPath, err := httpclient.Download(url, dir)
+			downloadPath, err := download(url, username, shortcode, likeCount)
 			if err != nil {
 				return err
 			}
@@ -77,7 +105,7 @@ func process(username string, shortcode string, accountID int) error {
 		break
 	case "GraphImage":
 		url := postPage.Graphql.ShortcodeMedia.DisplayURL
-		downloadPath, err := httpclient.Download(url, dir)
+		downloadPath, err := download(url, username, shortcode, likeCount)
 		if err != nil {
 			return err
 		}
@@ -97,7 +125,7 @@ func process(username string, shortcode string, accountID int) error {
 		break
 	case "GraphVideo":
 		url := postPage.Graphql.ShortcodeMedia.VideoURL
-		downloadPath, err := httpclient.Download(url, dir)
+		downloadPath, err := download(url, username, shortcode, likeCount)
 		if err != nil {
 			return err
 		}

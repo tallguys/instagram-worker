@@ -4,6 +4,7 @@ import (
 	"fmt"
 	accountBusiness "instagram-worker/internal/app/model/business/account"
 	accountPersist "instagram-worker/internal/app/model/persistence/account"
+	"os"
 
 	logger "github.com/sirupsen/logrus"
 )
@@ -48,6 +49,12 @@ func Crawl(username string) error {
 
 	// get the updated account info
 	account, err = accountPersist.FindAccountByUsername(username)
+	if err != nil {
+		return err
+	}
+
+	dir := fmt.Sprintf("%s/%s", cfg.Download.Folder, username)
+	err = os.MkdirAll(dir, 777)
 	if err != nil {
 		return err
 	}
